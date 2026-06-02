@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voiding Dysfunction Risk Calculator — Research Preview</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-icon">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+                </svg>
+            </div>
+            <h1>Voiding Dysfunction Risk Calculator</h1>
+            <p class="subtitle">Intraoperative prediction of prolonged voiding dysfunction (PVR &gt;100 mL at POD 7) after nerve-sparing radical hysterectomy for cervical cancer</p>
+            <p class="subtitle" style="font-style:italic;opacity:0.85;">Companion calculator for: <em>Surgical Radicality Dominates Prediction of Voiding Dysfunction After Nerve-Sparing Radical Hysterectomy: A Machine Learning Study With Temporal Validation</em> — research preview for internal feedback.</p>
+        </header>
+
+        <!-- Main content -->
+        <main class="main">
+            <!-- Input Panel -->
+            <section class="card input-panel">
+                <h2 class="card-title">Patient Parameters</h2>
+                <p class="card-description">Enter the patient's clinical and intraoperative data below. All fields are required.</p>
+
+                <form id="calculatorForm" novalidate>
+                    <div class="form-grid">
+                        <!-- Age -->
+                        <div class="form-group">
+                            <label for="age">
+                                Age
+                                <span class="unit">(years)</span>
+                            </label>
+                            <div class="input-wrapper">
+                                <input type="number" id="age" name="age"
+                                       min="18" max="90" step="1"
+                                       placeholder="e.g., 48"
+                                       required>
+                                <span class="input-range">Range: 18 - 90</span>
+                            </div>
+                        </div>
+
+                        <!-- BMI -->
+                        <div class="form-group">
+                            <label for="bmi">
+                                BMI
+                                <span class="unit">(kg/m&sup2;)</span>
+                            </label>
+                            <div class="input-wrapper">
+                                <input type="number" id="bmi" name="bmi"
+                                       min="10" max="60" step="0.1"
+                                       placeholder="e.g., 24.0"
+                                       required>
+                                <span class="input-range">Range: 10 - 60</span>
+                            </div>
+                        </div>
+
+                        <!-- Preoperative Lesion Size -->
+                        <div class="form-group">
+                            <label for="lesion_size">
+                                Preoperative Lesion Size
+                                <span class="unit">(cm)</span>
+                            </label>
+                            <div class="input-wrapper">
+                                <input type="number" id="lesion_size" name="lesion_size"
+                                       min="0" max="15" step="0.1"
+                                       placeholder="e.g., 2.5"
+                                       required>
+                                <span class="input-range">Range: 0 - 15 cm</span>
+                            </div>
+                        </div>
+
+                        <!-- Avg Parametrial Length -->
+                        <div class="form-group">
+                            <label for="avg_pm_length">
+                                Avg Parametrial Length
+                                <span class="unit">(cm)</span>
+                            </label>
+                            <div class="input-wrapper">
+                                <input type="number" id="avg_pm_length" name="avg_pm_length"
+                                       min="0" max="8" step="0.1"
+                                       placeholder="e.g., 2.0"
+                                       required>
+                                <span class="input-range">Range: 0 - 8 cm</span>
+                            </div>
+                        </div>
+
+                        <!-- Avg Vaginal Cuff Length -->
+                        <div class="form-group full-width">
+                            <label for="avg_vc_length">
+                                Avg Vaginal Cuff Length
+                                <span class="unit">(cm)</span>
+                                <span class="badge badge-primary">#1 Predictor</span>
+                            </label>
+                            <div class="input-wrapper">
+                                <input type="number" id="avg_vc_length" name="avg_vc_length"
+                                       min="0" max="6" step="0.1"
+                                       placeholder="e.g., 2.2"
+                                       required>
+                                <span class="input-range">Typical range: 1.0 - 4.0 cm</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="button-row">
+                        <button type="submit" class="btn btn-primary" id="calculateBtn">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                            </svg>
+                            Calculate Risk
+                        </button>
+                        <button type="button" class="btn btn-secondary" id="clearBtn">
+                            Clear All
+                        </button>
+                    </div>
+                </form>
+            </section>
+
+            <!-- Results Panel -->
+            <section class="card result-panel" id="resultPanel">
+                <h2 class="card-title">Prediction Result</h2>
+
+                <!-- Risk Gauge -->
+                <div class="gauge-container">
+                    <div class="gauge-bar-track">
+                        <div class="gauge-bar-fill" id="gaugeFill"></div>
+                        <div class="gauge-marker" id="gaugeMarker">
+                            <div class="gauge-marker-line"></div>
+                            <div class="gauge-marker-label" id="gaugeMarkerLabel">0%</div>
+                        </div>
+                    </div>
+                    <div class="gauge-labels">
+                        <span>0%</span>
+                        <span>25%</span>
+                        <span>50%</span>
+                        <span>75%</span>
+                        <span>100%</span>
+                    </div>
+                </div>
+
+                <!-- Probability Display -->
+                <div class="probability-display" id="probabilityDisplay">
+                    <div class="probability-value" id="probabilityValue">--</div>
+                    <div class="probability-label">Predicted Probability of Voiding Dysfunction</div>
+                </div>
+
+                <!-- Risk Category -->
+                <div class="risk-category" id="riskCategory">
+                    <span class="risk-badge" id="riskBadge">--</span>
+                    <span class="risk-text" id="riskText">Enter patient data and click Calculate Risk</span>
+                </div>
+
+                <!-- Risk Interpretation -->
+                <div class="interpretation" id="interpretation">
+                    <h3>Interpretation Guide</h3>
+                    <div class="interpretation-grid">
+                        <div class="interpretation-item low">
+                            <span class="dot"></span>
+                            <div>
+                                <strong>Low Risk (&lt;25%)</strong>
+                                <p>Standard postoperative voiding trial protocol</p>
+                            </div>
+                        </div>
+                        <div class="interpretation-item moderate">
+                            <span class="dot"></span>
+                            <div>
+                                <strong>Moderate Risk (25 - 50%)</strong>
+                                <p>Consider extended catheterization and close monitoring</p>
+                            </div>
+                        </div>
+                        <div class="interpretation-item high">
+                            <span class="dot"></span>
+                            <div>
+                                <strong>High Risk (&gt;50%)</strong>
+                                <p>Plan for prolonged catheter management and bladder rehabilitation</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Model Details -->
+        <section class="card model-details">
+            <h2 class="card-title">Model Details</h2>
+            <div class="model-equation">
+                <p><strong>Formula:</strong> P(voiding dysfunction) = 1 / (1 + e<sup>&minus;z</sup>)</p>
+                <p class="equation">z = &minus;2.0122 + 0.0235 &times; age &minus; 0.0444 &times; BMI + 0.0963 &times; lesion size + 0.2120 &times; parametrial length + 0.5479 &times; vaginal cuff length</p>
+            </div>
+            <div class="model-stats">
+                <div class="stat-item">
+                    <span class="stat-label">Validation AUC</span>
+                    <span class="stat-value">0.691 (95% CI 0.627&ndash;0.753)</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Calibration Slope</span>
+                    <span class="stat-value">1.19</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Brier Score</span>
+                    <span class="stat-value">0.212 (BSS = 0.07)</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Development Cohort</span>
+                    <span class="stat-value">n = 701 (329 events, 46.9%)</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Validation Cohort</span>
+                    <span class="stat-value">n = 319 (111 events, 34.8%)</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Disclaimer -->
+        <footer class="disclaimer">
+            <div class="disclaimer-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="12" y1="8" x2="12" y2="12"/>
+                    <line x1="12" y1="16" x2="12.01" y2="16"/>
+                </svg>
+            </div>
+            <div class="disclaimer-text">
+                <strong>Research Tool &mdash; For Research Use Only</strong>
+                <p>This calculator implements the 5-variable LASSO model from a single-center temporal validation study (n=1,020). It has <strong>not</strong> been externally validated at other institutions. Do not use as the sole basis for clinical decision-making. All patient management decisions should be made by qualified healthcare professionals based on comprehensive clinical assessment.</p>
+                <p class="disclaimer-meta">Model: 5-variable LASSO (C=0.1) &bull; Outcome: PVR &gt;100 mL at POD 7 &bull; Temporal validation AUC 0.691</p>
+                <p class="disclaimer-meta">💬 Feedback welcome: <a href="mailto:phume.ngam@gmail.com?subject=Voiding%20Dysfunction%20Calculator%20Feedback">phume.ngam@gmail.com</a></p>
+            </div>
+        </footer>
+
+        <!-- Attribution -->
+        <div class="attribution">
+            <p>Department of Obstetrics and Gynecology, Faculty of Medicine, Chiang Mai University &bull; 2026</p>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
